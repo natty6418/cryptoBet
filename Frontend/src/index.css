@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #6366f1;
+  --secondary: #4f46e5;
+  --accent: #10b981;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --background-dark: #0f172a;
+  --card-dark: #1e293b;
+}
+
+body {
+  @apply bg-slate-900 text-slate-100 font-sans antialiased;
+}
+
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center justify-center;
+  }
+  
+  .btn-primary {
+    @apply bg-indigo-600 hover:bg-indigo-700 text-white;
+  }
+  
+  .btn-secondary {
+    @apply bg-emerald-600 hover:bg-emerald-700 text-white;
+  }
+  
+  .btn-outline {
+    @apply border border-indigo-500 text-indigo-500 hover:bg-indigo-500 hover:text-white;
+  }
+  
+  .card {
+    @apply bg-slate-800 rounded-xl shadow-lg p-6 transition-all duration-300 hover:shadow-xl;
+  }
+
+  .input {
+    @apply px-4 py-2 bg-slate-700 rounded-lg border border-slate-600 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent;
+  }
+  
+  .badge {
+    @apply px-2 py-0.5 text-xs rounded-full font-medium;
+  }
+  
+  .badge-live {
+    @apply bg-red-500 text-white;
+  }
+  
+  .badge-upcoming {
+    @apply bg-amber-500 text-white;
+  }
+  
+  .badge-completed {
+    @apply bg-green-500 text-white;
+  }
+}
+
+/* Animation for countdown */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
