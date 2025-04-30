@@ -4,6 +4,9 @@ import { useEvents } from '../contexts/EventsContext';
 import { useWallet } from '../contexts/WalletContext';
 import { ArrowLeft, Users, Clock, Trophy, AlertCircle } from 'lucide-react';
 import BetForm from '../components/betting/BetForm';
+import { useBetChain } from '../hooks/useBetChain';
+import { ethers } from 'ethers';
+
 
 const EventDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -11,6 +14,7 @@ const EventDetails: React.FC = () => {
   const { events, placeBet } = useEvents();
   const { isConnected } = useWallet();
   const [selectedOutcome, setSelectedOutcome] = useState<number | null>(null);
+  const contract = useBetChain();
   
   const event = events.find(e => e.id === id);
   
@@ -35,13 +39,23 @@ const EventDetails: React.FC = () => {
     setSelectedOutcome(index);
   };
   
-  const handlePlaceBet = (amount: number) => {
-    if (selectedOutcome !== null) {
-      placeBet(event.id, selectedOutcome, amount);
-      // In a real app, we would call the smart contract here
-      alert(`Bet of ${amount} ETH placed on ${event.outcomes[selectedOutcome].name}`);
+  const handlePlaceBet = async (amount: number) => {
+    if (selectedOutcome === null || !contract) return;
+  
+    try {
+      const tx = await contract.placeBet(parseInt(id!), selectedOutcome, {
+        value: ethers.utils.parseEther(amount.toString()),
+      });
+      await tx.wait();
+
+      placeBet(id!, selectedOutcome, amount);
+      console.log('✅ Bet confirmed!');
+    } catch (err) {
+      console.error('❌ Bet failed:', err);
     }
   };
+  
+  
   
   return (
     <div>
