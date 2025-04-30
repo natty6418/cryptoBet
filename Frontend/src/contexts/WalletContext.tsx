@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
-// Add Ethereum interface to Window object
 declare global {
   interface Window {
     ethereum?: {
@@ -34,7 +33,6 @@ export const WalletProvider: React.FC<WalletProviderProps> = ({ children }) => {
   const [isConnected, setIsConnected] = useState(false);
   const [address, setAddress] = useState<string | null>(null);
   
-  // In a real application, this would use ethers.js or web3.js to connect to MetaMask
   const connect = async () => {
     if (typeof window.ethereum === 'undefined') {
       alert('MetaMask is not installed. Please install it to use this feature.');
@@ -42,19 +40,17 @@ export const WalletProvider: React.FC<WalletProviderProps> = ({ children }) => {
     }
   
     try {
-      // Request account access
       const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' }) as string[];
       
       if (accounts.length > 0) {
         setIsConnected(true);
-        setAddress(accounts[0]); // First account from MetaMask
+        setAddress(accounts[0]);
       }
     } catch (error) {
       console.error('Error connecting to MetaMask:', error);
       alert('Connection to MetaMask failed.');
     }
   };
-  
   
   const disconnect = () => {
     setIsConnected(false);
