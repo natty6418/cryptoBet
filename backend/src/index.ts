@@ -11,18 +11,11 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const allowedOrigins = [
-  'http://localhost:5173',
-  'https://crypto-bet-zeta.vercel.app'
-];
+const allowedOrigins = ['http://localhost:5173', 'https://crypto-bet-zeta.vercel.app'];
 
 app.use(cors({
   origin: (origin, callback) => {
-    if (
-      !origin ||
-      allowedOrigins.includes(origin) ||
-      /\.ngrok-free\.app$/.test(new URL(origin).hostname)
-    ) {
+    if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
@@ -30,7 +23,6 @@ app.use(cors({
   },
   credentials: true
 }));
-
 
 
 // Correct usage here!
