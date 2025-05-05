@@ -110,7 +110,12 @@
       // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
       "skipLibCheck": true,                                 /* Skip type checking all .d.ts files. */
       /* ←---  add these two lines  */
-    "resolveJsonModule": true,     // allow `import x from "./foo.json"`
-    }
+    "resolveJsonModule": true,     // allow `import x from "./foo.json"`,
+    "outDir": "dist",
+    "strict": true,
+    },
+    "include": [
+      "./src/**/*"
+    ],
   }
   
