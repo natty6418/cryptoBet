@@ -6,6 +6,8 @@ import { useWallet } from '../../contexts/WalletContext';
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { isConnected, address, connect, disconnect } = useWallet();
+
+  const adminAddress = import.meta.env.VITE_ADMIN_ADDRESS as string;
   
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   
@@ -28,9 +30,12 @@ const Header: React.FC = () => {
             <Link to="/dashboard" className="text-slate-200 hover:text-white transition-colors">
               Dashboard
             </Link>
-            <Link to="/admin" className="text-slate-200 hover:text-white transition-colors">
+            {
+              address?.toLowerCase() === adminAddress.toLowerCase() &&
+              <Link to="/admin" className="text-slate-200 hover:text-white transition-colors">
               Admin
             </Link>
+            }
             {!isConnected ? (
               <button 
                 onClick={connect}

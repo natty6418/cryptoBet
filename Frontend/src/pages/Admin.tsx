@@ -10,7 +10,7 @@ import { TrendingUp, AlertCircle, Lock, DollarSign, CheckCircle } from 'lucide-r
 
 const Admin: React.FC = () => {
   const navigate = useNavigate();
-  const { isConnected, connect } = useWallet(); // Added signer for potential owner checks later
+  const { isConnected, connect, address } = useWallet(); // Added signer for potential owner checks later
   const contract = useBetChain();
 
   // State for Create Event Form
@@ -432,6 +432,20 @@ const Admin: React.FC = () => {
   const openEvents = events.filter(event => event.status !== 'completed');
   const completedEvents = events.filter(event => event.status === 'completed');
 
+  // Check if the connected address is the admin (or contract owner)
+  if (address?.toLowerCase() !== import.meta.env.VITE_ADMIN_ADDRESS?.toLowerCase()) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto p-6 bg-slate-800 rounded-lg shadow-xl">
+          <AlertCircle className="mx-auto text-red-500 mb-4" size={48} />
+          <h2 className="text-2xl font-bold mb-2 text-white">Access Denied</h2>
+          <p className="text-slate-400 mb-6">
+            You do not have permission to access the admin panel. Please contact the administrator.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   // Main Admin Panel Render
   return (

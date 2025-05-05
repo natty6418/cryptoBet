@@ -6,7 +6,6 @@ import Dashboard from './pages/Dashboard';
 import { WalletProvider } from './contexts/WalletContext';
 import { EventsProvider } from './contexts/EventsContext';
 import AdminPage from './pages/Admin';
-import UserPage from './pages/Betting';
 
 function App() {
   return (
@@ -18,7 +17,6 @@ function App() {
             <Route path="/event/:id" element={<EventDetails />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/admin" element={<AdminPage />} />
-            <Route path="/user" element={<UserPage />} />
           </Routes>
         </Layout>
       </EventsProvider>
