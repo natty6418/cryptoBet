@@ -209,7 +209,7 @@ const Dashboard: React.FC = () => {
                             won &&
                             !bet.claimed && (
                               <button
-                                onClick={() => claimReward(bet.id)}
+                                onClick={() => claimReward(bet.id.toString())}
                                 className="btn btn-secondary py-1 px-4"
                               >
                                 Claim
