@@ -16,7 +16,7 @@ const BetForm: React.FC<BetFormProps> = ({
   selectedOutcomeId,
   onSubmit,
   placingBet,
-  alreadyBet
+  alreadyBet,
 }) => {
   const { address } = useWallet();
   const selectedOutcome = event.outcomes.find(
@@ -120,11 +120,24 @@ const BetForm: React.FC<BetFormProps> = ({
 }
       {/* Submit */}
       {alreadyBet? 
-      <button disabled={true} type="button" className="btn btn-secondary w-full">
-        Already Bet
-      </button> :
+      <button
+      disabled
+      type="button"
+      className="btn btn-secondary w-full opacity-50 cursor-not-allowed"
+    >
+      Already Bet
+    </button>
+    : placingBet ?
+      <button
+        disabled
+        type="button"
+        className="btn btn-secondary w-full opacity-50 cursor-not-allowed"
+      >
+        Placing Bet...
+      </button>
+      :
       
-      <button disabled={placingBet || event.status !== 'upcoming'} type="submit" className="btn btn-secondary w-full">
+      <button disabled={event.status !== 'upcoming'} type="submit" className="btn btn-secondary w-full">
         Place Bet
       </button>}
 

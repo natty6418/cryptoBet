@@ -16,13 +16,17 @@ const EventDetails: React.FC = () => {
   const { events, placeBet, placingBet, userBets, claimReward, isClaiming } = useEvents();
   const { isConnected } = useWallet();
 
+
+  if (!isConnected) {
+    navigate('/'); // Redirect to home if not connected
+  }
+
   const [selectedOutcome, setSelectedOutcome] = useState<string | null>(null);
   const [selectedOutcomeIndex, setSelectedOutcomeIndex] = useState<number | null>(null);
   const [closesIn, setClosesIn] = useState<string | null>(null);
 
   const event = events.find(e => e.id === id)!;
   const userBet = userBets.find(b => b.eventId.toString() === id);
-  // console.log('User Bet:', userBet);
   const winningOutcome = event?.outcomes.find(o => o.id === event.winningOutcome);
   const alreadyBet = Boolean(userBet);
   // Did the user pick the winning outcome?
@@ -40,6 +44,17 @@ const EventDetails: React.FC = () => {
     const netPool = event.pool * 0.98;
     payout = (userBet.amount / winningOutcome.amount) * netPool;
   }
+
+  useEffect(() => {
+    if (userBet) {
+      setSelectedOutcome(userBet.outcomeId);
+      const index = event.outcomes.findIndex(o => o.id === userBet.outcomeId);
+      setSelectedOutcomeIndex(index);
+    } else {
+      setSelectedOutcome(null);
+      setSelectedOutcomeIndex(null);
+    }
+  }, [userBet, event?.outcomes]);
 
   // Countdown (for upcoming events)
   useEffect(() => {
@@ -281,7 +296,7 @@ const EventDetails: React.FC = () => {
                                 ? 'border-emerald-500 bg-emerald-500/10' 
                                 : 'border-slate-600 hover:border-slate-500'}
                             `}
-                            onClick={() => handleSelectOutcome(outcome.id, index)}
+                            onClick={() => !alreadyBet && handleSelectOutcome(outcome.id, index)}
                           >
                             <div className="flex justify-between items-center">
                               <span>{outcome.name}</span>
@@ -293,7 +308,7 @@ const EventDetails: React.FC = () => {
                     
                     {selectedOutcome !== null && (
                       <BetForm 
-                      selectedOutcomeId={selectedOutcome} 
+                        selectedOutcomeId={selectedOutcome} 
                         onSubmit={handlePlaceBet}
                         event={event}
                         placingBet={placingBet}
