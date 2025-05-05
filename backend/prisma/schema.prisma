@@ -1,0 +1,48 @@
+// schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql" // or "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model EventMetadata {
+  id              Int       @id @default(autoincrement())
+  eventId         Int       @unique
+  title           String
+  description     String
+  longDescription String?
+  category        String
+  status          String
+  date            DateTime?
+  pool            Float     @default(0)
+  totalBets       Int       @default(0)
+  winningOutcome  String?
+
+  outcomes        Outcome[]
+  bets            BetLog[]
+}
+
+model Outcome {
+  id        Int            @id @default(autoincrement())
+  name      String
+  amount    Float          @default(0)
+  eventId   Int
+  event     EventMetadata  @relation(fields: [eventId], references: [eventId])
+  bets      BetLog[]
+}
+
+model BetLog {
+  id         Int            @id @default(autoincrement())
+  user       String
+  eventId    Int
+  outcomeId  Int
+  amount     Float
+  claimed     Boolean       @default(false)
+  createdAt  DateTime       @default(now())
+
+  event      EventMetadata  @relation(fields: [eventId], references: [eventId])
+  outcome    Outcome        @relation(fields: [outcomeId], references: [id])
+}

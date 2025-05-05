@@ -11,6 +11,9 @@ const Home: React.FC = () => {
   const filteredEvents = activeCategory === 'all' 
     ? events 
     : events.filter(event => event.category === activeCategory);
+
+    console.log('Filtered Events:', filteredEvents);
+    console.log('Active Category:', activeCategory);
   
   return (
     <div>
@@ -43,7 +46,7 @@ const Home: React.FC = () => {
                   ? 'bg-indigo-600 text-white' 
                   : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
               }`}
-              onClick={() => setActiveCategory(category.id)}
+              onClick={() => setActiveCategory(category.name)}
             >
               {category.name}
             </button>
@@ -52,7 +55,7 @@ const Home: React.FC = () => {
       </div>
       
       {/* Featured Event */}
-      {events.length > 0 && (
+      {(events.length > 0 && events.some(ev=>ev.status=='live') && activeCategory === 'all') && (
         <div className="mb-12">
           <h2 className="text-xl font-semibold mb-4">Featured Event</h2>
           <div className="bg-gradient-to-br from-indigo-900/50 to-indigo-700/30 rounded-2xl p-6 border border-indigo-600/30">
@@ -72,12 +75,7 @@ const Home: React.FC = () => {
                     <span className="text-slate-300">Total Pool</span>
                     <span className="font-semibold">{events[0].pool} ETH</span>
                   </div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-slate-300">Ends In</span>
-                    <span className="font-semibold text-amber-400">
-                      {events[0].timeRemaining}
-                    </span>
-                  </div>
+
                 </div>
               </div>
               
@@ -92,16 +90,11 @@ const Home: React.FC = () => {
                     >
                       <div className="flex justify-between items-center">
                         <span>{outcome.name}</span>
-                        <span className="text-emerald-400">x{outcome.odds.toFixed(2)}</span>
                       </div>
                       <div className="w-full bg-slate-800 h-1.5 rounded-full mt-2">
-                        <div 
-                          className="bg-emerald-500 h-1.5 rounded-full" 
-                          style={{ width: `${outcome.percentage}%` }}
-                        ></div>
+
                       </div>
                       <div className="flex justify-between items-center mt-1 text-xs text-slate-400">
-                        <span>{outcome.percentage}%</span>
                         <span>{outcome.amount} ETH</span>
                       </div>
                     </div>
@@ -116,7 +109,7 @@ const Home: React.FC = () => {
       {/* Events List */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold">All Markets</h2>
+          <h2 className="text-xl font-semibold">Betting Markets</h2>
           <button className="text-indigo-400 hover:text-indigo-300 flex items-center text-sm">
             <CircleHelp size={16} className="mr-1" />
             How it works

@@ -1,4 +1,3 @@
-import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Layout from './components/layout/Layout';
 import Home from './pages/Home';
@@ -6,6 +5,8 @@ import EventDetails from './pages/EventDetails';
 import Dashboard from './pages/Dashboard';
 import { WalletProvider } from './contexts/WalletContext';
 import { EventsProvider } from './contexts/EventsContext';
+import AdminPage from './pages/Admin';
+import UserPage from './pages/Betting';
 
 function App() {
   return (
@@ -16,6 +17,8 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/event/:id" element={<EventDetails />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/admin" element={<AdminPage />} />
+            <Route path="/user" element={<UserPage />} />
           </Routes>
         </Layout>
       </EventsProvider>

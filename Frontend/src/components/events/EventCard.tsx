@@ -7,7 +7,7 @@ interface EventCardProps {
 }
 
 const EventCard: React.FC<EventCardProps> = ({ event }) => {
-  const { id, title, category, status, pool, timeRemaining, outcomes } = event;
+  const { id, title, category, status, pool, outcomes } = event;
   
   return (
     <Link to={`/event/${id}`}>
@@ -40,29 +40,17 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
             <div className="font-medium">{pool} ETH</div>
           </div>
           
-          <div className="text-right">
-            <div className="text-sm text-slate-400">
-              {status === 'completed' ? 'Ended' : 'Ends In'}
-            </div>
-            <div className="font-medium text-amber-400">
-              {status === 'completed' ? 'Final' : timeRemaining}
-            </div>
-          </div>
+          {
+          //   <div className="text-right">
+          //   <div className="text-sm text-slate-400">
+          //     {status === 'completed' ? 'Ended' : 'Ends In'}
+          //   </div>
+            
+          // </div>
+          }
         </div>
         
-        <div className="space-y-2">
-          {outcomes.slice(0, 2).map((outcome, index) => (
-            <div key={index} className="flex items-center space-x-2">
-              <div className="w-full bg-slate-700 h-1.5 rounded-full">
-                <div 
-                  className="bg-emerald-500 h-1.5 rounded-full" 
-                  style={{ width: `${outcome.percentage}%` }}
-                ></div>
-              </div>
-              <div className="text-sm whitespace-nowrap">{outcome.percentage}%</div>
-            </div>
-          ))}
-        </div>
+       
         
         <div className="mt-4 flex justify-between items-center text-sm">
           <div className="text-slate-400">

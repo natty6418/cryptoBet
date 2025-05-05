@@ -1,57 +1,118 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useEvents } from '../contexts/EventsContext';
 import { useWallet } from '../contexts/WalletContext';
 import { ArrowLeft, Users, Clock, Trophy, AlertCircle } from 'lucide-react';
 import BetForm from '../components/betting/BetForm';
-import { useBetChain } from '../hooks/useBetChain';
-import { ethers } from 'ethers';
+// import { useBetChain } from '../hooks/useBetChain';
+// import { ethers } from 'ethers';
+import { Bet } from '../types';
+// import { ethers } from 'ethers';
 
 
 const EventDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { events, placeBet } = useEvents();
+  const { events, placeBet, placingBet, userBets, claimReward, isClaiming } = useEvents();
   const { isConnected } = useWallet();
-  const [selectedOutcome, setSelectedOutcome] = useState<number | null>(null);
-  const contract = useBetChain();
+
+  const [selectedOutcome, setSelectedOutcome] = useState<string | null>(null);
+  const [selectedOutcomeIndex, setSelectedOutcomeIndex] = useState<number | null>(null);
+  const [closesIn, setClosesIn] = useState<string | null>(null);
+
+  const event = events.find(e => e.id === id)!;
+  const userBet = userBets.find(b => b.eventId.toString() === id);
+  // console.log('User Bet:', userBet);
+  const winningOutcome = event?.outcomes.find(o => o.id === event.winningOutcome);
+  const alreadyBet = Boolean(userBet);
+  // Did the user pick the winning outcome?
+  const didWin = Boolean(
+    userBet &&
+    winningOutcome &&
+    userBet.outcomeId === winningOutcome.id
+  );
+  // Has the user already claimed?
+  const hasClaimed = Boolean(userBet?.claimed);
+
+  // Calculate payout after 2% fee
+  let payout: number | null = null;
+  if (didWin && userBet && winningOutcome) {
+    const netPool = event.pool * 0.98;
+    payout = (userBet.amount / winningOutcome.amount) * netPool;
+  }
+
+  // Countdown (for upcoming events)
+  useEffect(() => {
+    if (!event?.date || event.status !== 'upcoming') return;
   
-  const event = events.find(e => e.id === id);
   
+    let targetTime: Date;
+    if (typeof event.date === 'string') {
+      targetTime = new Date(event.date);
+    } else {
+      targetTime = new Date(Number(event.date) * 1000);
+    }
+  
+    if (isNaN(targetTime.getTime())) {
+      console.error("❌ Invalid event date:", event.date);
+      return;
+    }
+  
+  
+    const updateCountdown = () => {
+      const diff = targetTime.getTime() - Date.now();
+      const hrs = Math.floor(diff / 3_600_000);
+      const mins = Math.floor((diff % 3_600_000) / 60_000);
+      setClosesIn(diff >0 ? `${hrs}h ${mins}m`: 'Closed');
+    };
+  
+    updateCountdown(); // immediate update
+    const iv = setInterval(updateCountdown, 60000);
+  
+  
+    return () => {
+      clearInterval(iv);
+    };
+  }, [event?.date, event?.status]);
+  
+
+
+
   if (!event) {
     return (
       <div className="min-h-[50vh] flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold mb-2">Event Not Found</h2>
-          <p className="text-slate-400 mb-4">This event may have been removed or never existed.</p>
-          <button 
-            onClick={() => navigate('/')} 
-            className="btn btn-primary"
-          >
+          <p className="text-slate-400 mb-4">
+            This event may have been removed or never existed.
+          </p>
+          <button onClick={() => navigate('/')} className="btn btn-primary">
             Browse Markets
           </button>
         </div>
       </div>
     );
   }
+
   
-  const handleSelectOutcome = (index: number) => {
-    setSelectedOutcome(index);
+  const handleSelectOutcome = (id: string, index:number) => {
+    setSelectedOutcome(id);
+    setSelectedOutcomeIndex(index);
   };
   
-  const handlePlaceBet = async (amount: number) => {
-    if (selectedOutcome === null || !contract) return;
-  
+  const handlePlaceBet = async (bet: Bet) => {
+    console.log('Placing bet:', bet);
+    if (!isConnected) {
+      alert('Please connect your wallet to place a bet.');
+      return;
+    }
     try {
-      const tx = await contract.placeBet(parseInt(id!), selectedOutcome, {
-        value: ethers.utils.parseEther(amount.toString()),
-      });
-      await tx.wait();
-
-      placeBet(id!, selectedOutcome, amount);
-      console.log('✅ Bet confirmed!');
-    } catch (err) {
-      console.error('❌ Bet failed:', err);
+      const optionIdx = event.outcomes.findIndex(o => o.id === bet.outcomeId);
+      placeBet(bet.eventId, bet.amount.toString(), bet.outcomeId.toString(), optionIdx);
+    }
+    catch (error) {
+      console.error('Error placing bet:', error);
+      alert('Failed to place bet. Please try again.');
     }
   };
   
@@ -106,7 +167,7 @@ const EventDetails: React.FC = () => {
                 <Trophy className="text-amber-400 mr-3" size={20} />
                 <div>
                   <div className="text-sm text-slate-400">Pool Size</div>
-                  <div className="font-medium">{event.pool} ETH</div>
+                  <div className="font-medium">{event.pool} sETH</div>
                 </div>
               </div>
               
@@ -116,9 +177,10 @@ const EventDetails: React.FC = () => {
                   <div className="text-sm text-slate-400">
                     {event.status === 'completed' ? 'Ended' : 'Closes In'}
                   </div>
-                  <div className="font-medium text-amber-400">
-                    {event.status === 'completed' ? 'Final' : event.timeRemaining}
+                  <div className="font-medium">
+                    {closesIn || "Closed"}
                   </div>
+         
                 </div>
               </div>
             </div>
@@ -130,65 +192,67 @@ const EventDetails: React.FC = () => {
               </p>
             </div>
             
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Outcome Distribution</h2>
-              <div className="space-y-4">
-                {event.outcomes.map((outcome, index) => (
-                  <div key={index}>
-                    <div className="flex justify-between items-center mb-1">
-                      <span className="font-medium">{outcome.name}</span>
-                      <span className="text-emerald-400">x{outcome.odds.toFixed(2)}</span>
-                    </div>
-                    <div className="w-full bg-slate-700 h-2 rounded-full">
-                      <div 
-                        className="bg-emerald-500 h-2 rounded-full" 
-                        style={{ width: `${outcome.percentage}%` }}
-                      ></div>
-                    </div>
-                    <div className="flex justify-between items-center mt-1 text-sm text-slate-400">
-                      <span>{outcome.percentage}%</span>
-                      <span>{outcome.amount} ETH</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            
           </div>
           
           <div className="lg:w-1/3">
             {event.status === 'completed' ? (
               <div className="bg-slate-700 rounded-xl p-6">
-                <h2 className="text-xl font-semibold mb-4">Event Completed</h2>
-                <div className="mb-4">
-                  <div className="text-sm text-slate-400 mb-1">Winning Outcome</div>
-                  <div className="text-lg font-medium text-emerald-400">
-                    {event.outcomes[event.winningOutcome || 0].name}
-                  </div>
+              <h2 className="text-xl font-semibold mb-4">Event Completed</h2>
+
+              {/* Winning outcome */}
+              <div className="mb-4">
+                <div className="text-sm text-slate-400 mb-1">Winning Outcome</div>
+                <div className="text-lg font-medium text-emerald-400">
+                  {winningOutcome?.name}
                 </div>
-                
-                <div className="bg-slate-800 rounded-lg p-4 mb-4">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-slate-300">Total Pool</span>
-                    <span className="font-medium">{event.pool} ETH</span>
-                  </div>
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-slate-300">Winning Bets</span>
-                    <span className="font-medium">
-                      {event.outcomes[event.winningOutcome || 0].amount} ETH
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-slate-300">Payout Multiplier</span>
-                    <span className="font-medium text-emerald-400">
-                      x{event.outcomes[event.winningOutcome || 0].odds.toFixed(2)}
-                    </span>
-                  </div>
-                </div>
-                
-                <button className="btn btn-secondary w-full">
-                  View Results
-                </button>
               </div>
+
+              {/* Pool & winning bets */}
+              <div className="bg-slate-800 rounded-lg p-4 mb-4">
+                <div className="flex justify-between mb-2">
+                  <span className="text-slate-300">Total Pool</span>
+                  <span className="font-medium">{event.pool} sETH</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-300">Winning Bets</span>
+                  <span className="font-medium">
+                    {winningOutcome?.amount} sETH
+                  </span>
+                </div>
+              </div>
+
+              {/* User-specific outcome */}
+              {userBet ? (
+                didWin ? (
+                  <div className="mb-4 text-center">
+                    {hasClaimed ? (
+                      <p className="text-green-400 font-medium">
+                        You claimed {payout?.toFixed(4)} sETH
+                      </p>
+                    ) : (
+                      <>
+                        <p className="text-green-400 font-medium mb-2">
+                          You won {payout?.toFixed(4)} sETH!
+                        </p>
+                        <button
+                          onClick={() => claimReward(event.eventId.toString())}
+                          className="btn btn-primary w-full"
+                          disabled={isClaiming}
+                        >
+                          Claim Reward
+                        </button>
+                      </>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-red-400 font-medium text-center">
+                    Sorry, you did not win.
+                  </p>
+                )
+              ) : null}
+
+            </div>
             ) : (
               <div className="bg-slate-700 rounded-xl p-6">
                 <h2 className="text-xl font-semibold mb-4">Place Your Bet</h2>
@@ -213,15 +277,14 @@ const EventDetails: React.FC = () => {
                             key={index}
                             className={`
                               border rounded-lg p-3 cursor-pointer transition-all
-                              ${selectedOutcome === index 
+                              ${selectedOutcomeIndex === index 
                                 ? 'border-emerald-500 bg-emerald-500/10' 
                                 : 'border-slate-600 hover:border-slate-500'}
                             `}
-                            onClick={() => handleSelectOutcome(index)}
+                            onClick={() => handleSelectOutcome(outcome.id, index)}
                           >
                             <div className="flex justify-between items-center">
                               <span>{outcome.name}</span>
-                              <span className="text-emerald-400">x{outcome.odds.toFixed(2)}</span>
                             </div>
                           </div>
                         ))}
@@ -230,8 +293,11 @@ const EventDetails: React.FC = () => {
                     
                     {selectedOutcome !== null && (
                       <BetForm 
-                        selectedOutcome={event.outcomes[selectedOutcome]} 
+                      selectedOutcomeId={selectedOutcome} 
                         onSubmit={handlePlaceBet}
+                        event={event}
+                        placingBet={placingBet}
+                        alreadyBet={alreadyBet}
                       />
                     )}
                   </>

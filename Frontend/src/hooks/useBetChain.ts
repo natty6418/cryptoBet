@@ -1,19 +1,22 @@
+//useBetChain.ts
 import { useMemo } from 'react';
 import { ethers } from 'ethers';
 import BetChainABI from '../contracts/BetChain.json';
 import { useWallet } from '../contexts/WalletContext';
 
-const CONTRACT_ADDRESS = '0xd9145CCE52D386f254917e481eB44e9943F39138';
+const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS as string;
 
 export const useBetChain = () => {
   const { isConnected } = useWallet();
 
   const contract = useMemo(() => {
-    if (!isConnected || !window.ethereum) return null;
+    if (!window.ethereum) return null;
 
     const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
-    return new ethers.Contract(CONTRACT_ADDRESS, BetChainABI.abi, signer);
+
+    return  new ethers.Contract(CONTRACT_ADDRESS, BetChainABI.abi, provider.getSigner());
+
+    // return { read, write };
   }, [isConnected]);
 
   return contract;

@@ -28,6 +28,9 @@ const Header: React.FC = () => {
             <Link to="/dashboard" className="text-slate-200 hover:text-white transition-colors">
               Dashboard
             </Link>
+            <Link to="/admin" className="text-slate-200 hover:text-white transition-colors">
+              Admin
+            </Link>
             {!isConnected ? (
               <button 
                 onClick={connect}
@@ -78,6 +81,13 @@ const Header: React.FC = () => {
               onClick={() => setIsMenuOpen(false)}
             >
               Dashboard
+            </Link>
+            <Link 
+              to="/admin" 
+              className="text-slate-200 hover:text-white transition-colors py-2"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Admin
             </Link>
             {!isConnected ? (
               <button 
