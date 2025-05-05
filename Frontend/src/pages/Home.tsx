@@ -42,7 +42,7 @@ const Home: React.FC = () => {
             <button 
               key={category.id}
               className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
-                activeCategory === category.id 
+                activeCategory === category.name 
                   ? 'bg-indigo-600 text-white' 
                   : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
               }`}
