@@ -55,56 +55,59 @@ const Home: React.FC = () => {
       </div>
       
       {/* Featured Event */}
-      {(events.length > 0 && events.some(ev=>ev.status=='live') && activeCategory === 'all') && (
-        <div className="mb-12">
-          <h2 className="text-xl font-semibold mb-4">Featured Event</h2>
-          <div className="bg-gradient-to-br from-indigo-900/50 to-indigo-700/30 rounded-2xl p-6 border border-indigo-600/30">
-            <div className="flex flex-col md:flex-row gap-6">
-              <div className="md:w-3/5">
-                <div className="flex items-center space-x-2 mb-3">
-                  <span className="badge badge-live flex items-center">
-                    <span className="w-2 h-2 bg-white rounded-full mr-1 animate-pulse"></span>
-                    LIVE
-                  </span>
-                  <span className="text-slate-400 text-sm">{events[0].category}</span>
-                </div>
-                <h3 className="text-2xl font-bold mb-3">{events[0].title}</h3>
-                <p className="text-slate-300 mb-4">{events[0].description}</p>
-                <div className="mb-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-slate-300">Total Pool</span>
-                    <span className="font-semibold">{events[0].pool} ETH</span>
-                  </div>
+      {(events.length > 0 && events.some(ev => ev.status === 'live') && activeCategory === 'all') && (() => {
+  const liveEvent = events.find(ev => ev.status === 'live');
+  if (!liveEvent) return null;
 
-                </div>
-              </div>
-              
-              <div className="md:w-2/5">
-                <div className="bg-slate-800/80 rounded-xl p-4">
-                  <h4 className="text-lg font-medium mb-3">Place your prediction</h4>
-                  
-                  {events[0].outcomes.map((outcome, index) => (
-                    <div 
-                      key={index}
-                      className="bg-slate-700 rounded-lg p-3 mb-3 hover:bg-slate-600 transition-colors cursor-pointer"
-                    >
-                      <div className="flex justify-between items-center">
-                        <span>{outcome.name}</span>
-                      </div>
-                      <div className="w-full bg-slate-800 h-1.5 rounded-full mt-2">
-
-                      </div>
-                      <div className="flex justify-between items-center mt-1 text-xs text-slate-400">
-                        <span>{outcome.amount} ETH</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+  return (
+    <div className="mb-12">
+      <h2 className="text-xl font-semibold mb-4">Featured Event</h2>
+      <div className="bg-gradient-to-br from-indigo-900/50 to-indigo-700/30 rounded-2xl p-6 border border-indigo-600/30">
+        <div className="flex flex-col md:flex-row gap-6">
+          <div className="md:w-3/5">
+            <div className="flex items-center space-x-2 mb-3">
+              <span className="badge badge-live flex items-center">
+                <span className="w-2 h-2 bg-white rounded-full mr-1 animate-pulse"></span>
+                LIVE
+              </span>
+              <span className="text-slate-400 text-sm">{liveEvent.category}</span>
+            </div>
+            <h3 className="text-2xl font-bold mb-3">{liveEvent.title}</h3>
+            <p className="text-slate-300 mb-4">{liveEvent.description}</p>
+            <div className="mb-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-slate-300">Total Pool</span>
+                <span className="font-semibold">{liveEvent.pool} ETH</span>
               </div>
             </div>
           </div>
+
+          <div className="md:w-2/5">
+            <div className="bg-slate-800/80 rounded-xl p-4">
+              <h4 className="text-lg font-medium mb-3">Place your prediction</h4>
+
+              {liveEvent.outcomes.map((outcome, index) => (
+                <div
+                  key={index}
+                  className="bg-slate-700 rounded-lg p-3 mb-3 hover:bg-slate-600 transition-colors cursor-pointer"
+                >
+                  <div className="flex justify-between items-center">
+                    <span>{outcome.name}</span>
+                  </div>
+                  <div className="w-full bg-slate-800 h-1.5 rounded-full mt-2"></div>
+                  <div className="flex justify-between items-center mt-1 text-xs text-slate-400">
+                    <span>{outcome.amount} ETH</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
-      )}
+      </div>
+    </div>
+  );
+})()}
+
       
       {/* Events List */}
       <div>
